@@ -1,12 +1,13 @@
-import pygame
 import random
 import sys
 from typing import Dict, List, Tuple
 
+import pygame
+
 # Window and grid settings
 s_width = 800
 s_height = 700
-play_width = 300   # 10 blocks wide
+play_width = 300  # 10 blocks wide
 play_height = 600  # 20 blocks tall
 block_size = 30
 
@@ -20,117 +21,53 @@ GREY = (128, 128, 128)
 LIGHT_GREY = (180, 180, 180)
 
 # Shape formats (5x5 templates)
-S = [['.....',
-      '.....',
-      '..00.',
-      '.00..',
-      '.....'],
-     ['.....',
-      '..0..',
-      '..00.',
-      '...0.',
-      '.....']]
+S = [
+    [".....", ".....", "..00.", ".00..", "....."],
+    [".....", "..0..", "..00.", "...0.", "....."],
+]
 
-Z = [['.....',
-      '.....',
-      '.00..',
-      '..00.',
-      '.....'],
-     ['.....',
-      '..0..',
-      '.00..',
-      '.0...',
-      '.....']]
+Z = [
+    [".....", ".....", ".00..", "..00.", "....."],
+    [".....", "..0..", ".00..", ".0...", "....."],
+]
 
-I = [['..0..',
-      '..0..',
-      '..0..',
-      '..0..',
-      '.....'],
-     ['.....',
-      '0000.',
-      '.....',
-      '.....',
-      '.....']]
+I = [
+    ["..0..", "..0..", "..0..", "..0..", "....."],
+    [".....", "0000.", ".....", ".....", "....."],
+]
 
-O = [['.....',
-      '.....',
-      '.00..',
-      '.00..',
-      '.....']]
+O = [[".....", ".....", ".00..", ".00..", "....."]]
 
-J = [['.....',
-      '.0...',
-      '.000.',
-      '.....',
-      '.....'],
-     ['.....',
-      '..00.',
-      '..0..',
-      '..0..',
-      '.....'],
-     ['.....',
-      '.....',
-      '.000.',
-      '...0.',
-      '.....'],
-     ['.....',
-      '..0..',
-      '..0..',
-      '.00..',
-      '.....']]
+J = [
+    [".....", ".0...", ".000.", ".....", "....."],
+    [".....", "..00.", "..0..", "..0..", "....."],
+    [".....", ".....", ".000.", "...0.", "....."],
+    [".....", "..0..", "..0..", ".00..", "....."],
+]
 
-L = [['.....',
-      '...0.',
-      '.000.',
-      '.....',
-      '.....'],
-     ['.....',
-      '..0..',
-      '..0..',
-      '..00.',
-      '.....'],
-     ['.....',
-      '.....',
-      '.000.',
-      '.0...',
-      '.....'],
-     ['.....',
-      '.00..',
-      '..0..',
-      '..0..',
-      '.....']]
+L = [
+    [".....", "...0.", ".000.", ".....", "....."],
+    [".....", "..0..", "..0..", "..00.", "....."],
+    [".....", ".....", ".000.", ".0...", "....."],
+    [".....", ".00..", "..0..", "..0..", "....."],
+]
 
-T = [['.....',
-      '..0..',
-      '.000.',
-      '.....',
-      '.....'],
-     ['.....',
-      '..0..',
-      '..00.',
-      '..0..',
-      '.....'],
-     ['.....',
-      '.....',
-      '.000.',
-      '..0..',
-      '.....'],
-     ['.....',
-      '..0..',
-      '.00..',
-      '..0..',
-      '.....']]
+T = [
+    [".....", "..0..", ".000.", ".....", "....."],
+    [".....", "..0..", "..00.", "..0..", "....."],
+    [".....", ".....", ".000.", "..0..", "....."],
+    [".....", "..0..", ".00..", "..0..", "....."],
+]
 
 shapes = [S, Z, I, O, J, L, T]
 shape_colors = [
-    (80, 220, 100),   # S - green
-    (220, 60, 80),    # Z - red
-    (60, 200, 240),   # I - cyan
-    (240, 240, 70),   # O - yellow
-    (60, 120, 220),   # J - blue
-    (240, 160, 60),   # L - orange
-    (180, 70, 200)    # T - purple
+    (80, 220, 100),  # S - green
+    (220, 60, 80),  # Z - red
+    (60, 200, 240),  # I - cyan
+    (240, 240, 70),  # O - yellow
+    (60, 120, 220),  # J - blue
+    (240, 160, 60),  # L - orange
+    (180, 70, 200),  # T - purple
 ]
 
 # Type aliases
@@ -146,7 +83,7 @@ class Piece:
         self.color = shape_colors[shapes.index(shape)]
         self.rotation = 0  # index of rotation state
 
-    def clone(self) -> 'Piece':
+    def clone(self) -> "Piece":
         p = Piece(self.x, self.y, self.shape)
         p.rotation = self.rotation
         return p
@@ -168,13 +105,15 @@ def convert_shape_format(piece: Piece) -> List[Tuple[int, int]]:
     for i, line in enumerate(format):
         row = list(line)
         for j, column in enumerate(row):
-            if column == '0':
+            if column == "0":
                 positions.append((piece.x + j - 2, piece.y + i - 4))
     return positions
 
 
 def valid_space(piece: Piece, grid: Grid) -> bool:
-    accepted_positions = [(j, i) for i in range(20) for j in range(10) if grid[i][j] == BLACK]
+    accepted_positions = [
+        (j, i) for i in range(20) for j in range(10) if grid[i][j] == BLACK
+    ]
     formatted = convert_shape_format(piece)
 
     for pos in formatted:
@@ -187,7 +126,7 @@ def valid_space(piece: Piece, grid: Grid) -> bool:
 
 
 def check_lost(locked: LockedPositions) -> bool:
-    for (_, y) in locked.keys():
+    for _, y in locked.keys():
         if y < 1:
             return True
     return False
@@ -198,40 +137,58 @@ def get_shape() -> Piece:
 
 
 def draw_text_middle(surface, text, size, color):
-    font = pygame.font.SysFont('segoeui', size, bold=True)
+    font = pygame.font.SysFont("segoeui", size, bold=True)
     label = font.render(text, True, color)
 
-    surface.blit(label, (top_left_x + play_width/2 - (label.get_width()/2),
-                         top_left_y + play_height/2 - label.get_height()/2))
+    surface.blit(
+        label,
+        (
+            top_left_x + play_width / 2 - (label.get_width() / 2),
+            top_left_y + play_height / 2 - label.get_height() / 2,
+        ),
+    )
 
 
 def draw_grid_lines(surface):
     # draw grid border
-    pygame.draw.rect(surface, WHITE, (top_left_x - 2, top_left_y - 2, play_width + 4, play_height + 4), 2)
+    pygame.draw.rect(
+        surface,
+        WHITE,
+        (top_left_x - 2, top_left_y - 2, play_width + 4, play_height + 4),
+        2,
+    )
     # draw internal lines
     for i in range(20):
-        pygame.draw.line(surface, LIGHT_GREY, (top_left_x, top_left_y + i*block_size),
-                         (top_left_x + play_width, top_left_y + i*block_size))
+        pygame.draw.line(
+            surface,
+            LIGHT_GREY,
+            (top_left_x, top_left_y + i * block_size),
+            (top_left_x + play_width, top_left_y + i * block_size),
+        )
     for j in range(10):
-        pygame.draw.line(surface, LIGHT_GREY, (top_left_x + j*block_size, top_left_y),
-                         (top_left_x + j*block_size, top_left_y + play_height))
+        pygame.draw.line(
+            surface,
+            LIGHT_GREY,
+            (top_left_x + j * block_size, top_left_y),
+            (top_left_x + j * block_size, top_left_y + play_height),
+        )
 
 
 def draw_window(surface, grid: Grid, score: int, level: int, lines: int):
     surface.fill((20, 20, 25))
 
     # Title
-    font = pygame.font.SysFont('segoeui', 48, bold=True)
-    label = font.render('TETRIS', True, WHITE)
-    surface.blit(label, (top_left_x + play_width/2 - label.get_width()/2, 30))
+    font = pygame.font.SysFont("segoeui", 48, bold=True)
+    label = font.render("TETRIS", True, WHITE)
+    surface.blit(label, (top_left_x + play_width / 2 - label.get_width() / 2, 30))
 
     # Score box
-    font_small = pygame.font.SysFont('segoeui', 22)
+    font_small = pygame.font.SysFont("segoeui", 22)
     stats_x = top_left_x + play_width + 40
     stats_y = top_left_y
-    lines_surf = font_small.render(f'Lines: {lines}', True, WHITE)
-    level_surf = font_small.render(f'Level: {level}', True, WHITE)
-    score_surf = font_small.render(f'Score: {score}', True, WHITE)
+    lines_surf = font_small.render(f"Lines: {lines}", True, WHITE)
+    level_surf = font_small.render(f"Level: {level}", True, WHITE)
+    score_surf = font_small.render(f"Score: {score}", True, WHITE)
 
     surface.blit(lines_surf, (stats_x, stats_y))
     surface.blit(level_surf, (stats_x, stats_y + 28))
@@ -242,29 +199,53 @@ def draw_window(surface, grid: Grid, score: int, level: int, lines: int):
         for j in range(len(grid[i])):
             color = grid[i][j]
             if color != BLACK:
-                pygame.draw.rect(surface, color, (top_left_x + j*block_size, top_left_y + i*block_size, block_size, block_size), border_radius=4)
+                pygame.draw.rect(
+                    surface,
+                    color,
+                    (
+                        top_left_x + j * block_size,
+                        top_left_y + i * block_size,
+                        block_size,
+                        block_size,
+                    ),
+                    border_radius=4,
+                )
             else:
                 # draw subtle background squares
-                pygame.draw.rect(surface, (30, 30, 38), (top_left_x + j*block_size, top_left_y + i*block_size, block_size, block_size))
+                pygame.draw.rect(
+                    surface,
+                    (30, 30, 38),
+                    (
+                        top_left_x + j * block_size,
+                        top_left_y + i * block_size,
+                        block_size,
+                        block_size,
+                    ),
+                )
 
     draw_grid_lines(surface)
 
 
 def draw_next_shape(piece: Piece, surface):
-    font = pygame.font.SysFont('segoeui', 24, bold=True)
-    label = font.render('Next', True, WHITE)
+    font = pygame.font.SysFont("segoeui", 24, bold=True)
+    label = font.render("Next", True, WHITE)
 
     sx = top_left_x - 150
     sy = top_left_y + 80
 
-    surface.blit(label, (sx + 50 - label.get_width()/2, sy - 40))
+    surface.blit(label, (sx + 50 - label.get_width() / 2, sy - 40))
 
     format = piece.shape[piece.rotation % len(piece.shape)]
 
     for i, line in enumerate(format):
         for j, column in enumerate(list(line)):
-            if column == '0':
-                pygame.draw.rect(surface, piece.color, (sx + j*20, sy + i*20, 20, 20), border_radius=3)
+            if column == "0":
+                pygame.draw.rect(
+                    surface,
+                    piece.color,
+                    (sx + j * 20, sy + i * 20, 20, 20),
+                    border_radius=3,
+                )
 
 
 def draw_ghost(piece: Piece, grid: Grid, surface):
@@ -274,15 +255,20 @@ def draw_ghost(piece: Piece, grid: Grid, surface):
         if not valid_space(ghost, grid):
             ghost.y -= 1
             break
-    for (x, y) in convert_shape_format(ghost):
+    for x, y in convert_shape_format(ghost):
         if y >= 0:
-            rect = pygame.Rect(top_left_x + x*block_size, top_left_y + y*block_size, block_size, block_size)
+            rect = pygame.Rect(
+                top_left_x + x * block_size,
+                top_left_y + y * block_size,
+                block_size,
+                block_size,
+            )
             pygame.draw.rect(surface, (200, 200, 200), rect, width=2, border_radius=4)
 
 
 def clear_rows(grid: Grid, locked: LockedPositions) -> int:
     removed = 0
-    for i in range(len(grid)-1, -1, -1):
+    for i in range(len(grid) - 1, -1, -1):
         if BLACK not in grid[i]:
             removed += 1
             # remove locked in this row
@@ -292,10 +278,10 @@ def clear_rows(grid: Grid, locked: LockedPositions) -> int:
                 except KeyError:
                     continue
             # shift rows above down
-            for y in range(i-1, -1, -1):
+            for y in range(i - 1, -1, -1):
                 for x in range(10):
                     if (x, y) in locked:
-                        locked[(x, y+1)] = locked[(x, y)]
+                        locked[(x, y + 1)] = locked[(x, y)]
                         del locked[(x, y)]
             # after shifting, re-check same row index i
             # because new content came down
@@ -463,14 +449,14 @@ def main(surface):
 def main_menu():
     pygame.init()
     surface = pygame.display.set_mode((s_width, s_height))
-    pygame.display.set_caption('Tetris - Pygame')
+    pygame.display.set_caption("Tetris - Pygame")
 
     clock = pygame.time.Clock()
 
     while True:
         surface.fill((20, 20, 25))
         draw_text_middle(surface, "Press ENTER to Play", 36, WHITE)
-        font = pygame.font.SysFont('segoeui', 18)
+        font = pygame.font.SysFont("segoeui", 18)
         help_lines = [
             "Controls:",
             "Left/Right: Move",
@@ -481,7 +467,7 @@ def main_menu():
         ]
         for i, t in enumerate(help_lines):
             txt = font.render(t, True, LIGHT_GREY)
-            surface.blit(txt, (top_left_x + play_width + 40, top_left_y + 120 + i*22))
+            surface.blit(txt, (top_left_x + play_width + 40, top_left_y + 120 + i * 22))
 
         pygame.display.update()
         clock.tick(30)
@@ -498,5 +484,5 @@ def main_menu():
                     sys.exit(0)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main_menu()
